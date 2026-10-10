@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101013" />
+    <title>Smoke &amp; Tape — Cassette Widget</title>
+    <link rel="stylesheet" href="./src/cassette.css" />
+  </head>
+  <body>
+    <main class="showcase">
+      <div class="window-controls" aria-label="Window controls">
+        <button type="button" data-pin aria-label="Toggle always-on-top" aria-pressed="true">⌖</button>
+        <button type="button" data-minimize aria-label="Minimize widget">—</button>
+        <button type="button" data-close aria-label="Hide widget">×</button>
+      </div>
+
+      <section class="cassette-stage" aria-label="Cassette widget preview">
+        <article class="cassette" data-cassette role="button" tabindex="0" aria-expanded="false" aria-controls="player-controls" aria-label="Open playback controls">
+          <div class="cassette__shadow" aria-hidden="true"></div>
+          <div class="cassette__shell">
+            <div class="cassette__gloss" aria-hidden="true"></div>
+            <div class="cassette__grain" aria-hidden="true"></div>
+            <div class="cassette__rim cassette__rim--top" aria-hidden="true"></div>
+            <div class="cassette__rim cassette__rim--bottom" aria-hidden="true"></div>
+
+            <div class="cassette__screw cassette__screw--tl" aria-hidden="true"></div>
+            <div class="cassette__screw cassette__screw--tr" aria-hidden="true"></div>
+            <div class="cassette__screw cassette__screw--bl" aria-hidden="true"></div>
+            <div class="cassette__screw cassette__screw--br" aria-hidden="true"></div>
+
+            <div class="cassette__label">
+              <div class="cassette__technical" aria-hidden="true">
+                <span>Stereo <b>□</b></span><span>Mono <b>□</b></span><span>Dolby <b>□</b></span><small>BIAS Cr HIGH<br />EQ 70µs</small>
+              </div>
+              <div class="cassette__art" data-artwork aria-hidden="true">
+                <span class="art-orb art-orb--one"></span>
+                <span class="art-orb art-orb--two"></span>
+                <span class="art-grid"></span>
+              </div>
+              <div class="cassette__metadata">
+                <span class="cassette__side">Side A</span>
+                <span class="cassette__catalog">ST-092</span>
+                <h2 data-title>Ready when you are</h2>
+                <p data-artist>Play something on your PC</p>
+              </div>
+              <span class="cassette__duration" aria-hidden="true">90</span>
+              <div class="cassette__stripe" aria-hidden="true"></div>
+            </div>
+
+            <div class="cassette__window">
+              <div class="cassette__tape cassette__tape--left" aria-hidden="true"></div>
+              <div class="cassette__tape cassette__tape--right" aria-hidden="true"></div>
+              <div class="cassette__reel cassette__reel--left" aria-hidden="true"><i></i><b></b></div>
+              <div class="cassette__reel cassette__reel--right" aria-hidden="true"><i></i><b></b></div>
+              <div class="cassette__tape-line" aria-hidden="true"></div>
+              <span class="cassette__window-mark">60</span>
+            </div>
+
+            <div class="cassette__type-mark" aria-hidden="true"><strong>POSITION CHROME</strong><span>IEC II / TYPE II</span></div>
+            <div class="cassette__bridge" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="cassette__bottom-housing" aria-hidden="true">
+              <div class="cassette__grip"></div>
+              <span class="cassette__guide cassette__guide--left"></span>
+              <span class="cassette__pad cassette__pad--left"></span>
+              <span class="cassette__pad cassette__pad--right"></span>
+              <span class="cassette__guide cassette__guide--right"></span>
+            </div>
+            <div class="cassette__notch cassette__notch--left" aria-hidden="true"></div>
+            <div class="cassette__notch cassette__notch--right" aria-hidden="true"></div>
+            <div class="cassette__spine" aria-hidden="true">STEREO / CrO₂ / 2026</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="player-panel" id="player-controls" aria-label="Media controls" aria-hidden="true" inert>
+        <div class="player-panel__timeline"><span data-elapsed>0:00</span><div class="player-panel__progress" data-progress><span></span></div><span data-total>—:——</span></div>
+        <div class="player-panel__controls">
+          <button type="button" data-command="previous" aria-label="Previous track"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 6 9 12l9 6V6Z"/></svg></button>
+          <button class="player-panel__play" type="button" data-command="toggle">Play</button>
+          <button type="button" data-command="next" aria-label="Next track"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 6l9 6-9 6V6Z"/></svg></button>
+        </div>
+      </section>
+    </main>
+    <script src="./src/renderer.js"></script>
+  </body>
+</html>
