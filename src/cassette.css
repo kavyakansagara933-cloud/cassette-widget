@@ -1,0 +1,805 @@
+/* ==========================================================================
+   Smoke & Tape: cassette widget styles
+   Consolidated from the stacked override blocks. Every rule below is the
+   value that was actually winning in the cascade, plus the bug fixes.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fonts (bundled locally so the widget looks the same offline).
+   Put these files in  src/fonts/  (all are OFL-licensed, free from Google Fonts):
+     Manrope-Variable.woff2, DMMono-Regular.woff2, DMMono-Medium.woff2,
+     PermanentMarker-Regular.woff2
+   If a file is missing, the fallback stacks below are used instead.
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Manrope"; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: local("Manrope"), url("./fonts/Manrope-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Mono"; font-style: normal; font-weight: 400; font-display: swap;
+  src: local("DM Mono"), local("DMMono-Regular"), url("./fonts/DMMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Mono"; font-style: normal; font-weight: 500; font-display: swap;
+  src: local("DM Mono Medium"), local("DMMono-Medium"), url("./fonts/DMMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap;
+  src: local("Permanent Marker"), url("./fonts/PermanentMarker-Regular.woff2") format("woff2");
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+  --font-ui: Manrope, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "DM Mono", "Cascadia Mono", Consolas, monospace;
+  --font-hand: "Permanent Marker", "Segoe Print", "Comic Sans MS", cursive;
+  --focus-ring: rgba(235, 181, 127, .85);
+  font-family: var(--font-ui);
+  background: transparent;
+  color: #f3eee8;
+}
+* { box-sizing: border-box; }
+html, body { background: transparent; overflow: hidden; }
+body { margin: 0; min-width: 320px; user-select: none; }
+
+/* The whole widget is a drag region; interactive parts opt out below. */
+.showcase {
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: .05rem;
+  padding: .55rem .55rem .8rem;
+  overflow: hidden;
+  -webkit-app-region: drag;
+}
+.showcase::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 12% 5% 19%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(210, 122, 82, .16), rgba(33, 37, 48, .1) 42%, transparent 70%);
+  filter: blur(19px);
+  pointer-events: none;
+}
+
+.cassette-stage {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  min-height: 0;
+  perspective: 1000px;
+}
+
+/* --------------------------------------------------------------------------
+   Cassette body
+   -------------------------------------------------------------------------- */
+.cassette {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glare-x: 50%;
+  --glare-y: 45%;
+  position: relative;
+  width: clamp(310px, 86vw, 390px);
+  aspect-ratio: 1.58 / 1;
+  /* No preserve-3d and no filter: both break backdrop-filter on the glass shell. */
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.cassette:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 7px;
+  border-radius: 8%;
+}
+
+.cassette__shadow {
+  position: absolute;
+  z-index: -1;
+  inset: 88% 6% -5%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  filter: blur(14px);
+  transform: rotate(-2deg);
+}
+
+/* Smoked-glass shell */
+.cassette__shell {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid rgba(235, 240, 245, .38);
+  border-radius: 7% 7% 4% 4%;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, .22), transparent 28%, transparent 70%, rgba(255, 255, 255, .1)),
+    rgba(26, 30, 36, .5);
+  -webkit-backdrop-filter: blur(3px) saturate(1.1);
+          backdrop-filter: blur(3px) saturate(1.1);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, .55),
+    inset 0 0 0 4px rgba(255, 255, 255, .06),
+    inset 0 -2px 6px rgba(0, 0, 0, .5);
+}
+.cassette__shell::before {
+  content: "";
+  position: absolute;
+  inset: 1.8%;
+  border-radius: 6%;
+  border: 1px solid rgba(255, 255, 255, .11);
+  pointer-events: none;
+}
+.cassette__shell::after {
+  content: "";
+  position: absolute;
+  inset: 4% 3%;
+  border-radius: 5%;
+  opacity: .42;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 7px, rgba(255, 255, 255, .09) 8px, transparent 10px),
+    radial-gradient(ellipse at 15% 81%, rgba(218, 218, 207, .21) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 88% 78%, rgba(218, 218, 207, .14) 0 1px, transparent 2px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Glare that follows the pointer, plus fine scratches */
+.cassette__gloss {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255, 255, 255, .28), transparent 14%),
+    linear-gradient(118deg, transparent 34%, rgba(255, 255, 255, .13) 44%, transparent 53%),
+    linear-gradient(63deg, transparent 61%, rgba(255, 255, 255, .35) 61.15%, transparent 61.4%),
+    linear-gradient(101deg, transparent 22%, rgba(255, 255, 255, .28) 22.1%, transparent 22.3%),
+    linear-gradient(77deg, transparent 83%, rgba(255, 255, 255, .25) 83.1%, transparent 83.3%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.cassette__rim {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  height: 2.3%;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .25), rgba(0, 0, 0, .35));
+  opacity: .75;
+}
+.cassette__rim--top { top: 3.3%; }
+.cassette__rim--bottom { bottom: 3.3%; }
+.cassette__grain {
+  position: absolute;
+  inset: 0;
+  opacity: .29;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Brass screws */
+.cassette__screw {
+  position: absolute;
+  z-index: 3;
+  width: 3.8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #fff1b8 0 6%, #d4a64a 9% 30%, #8a6420 45%, #2a1d08 56%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 225, 150, .25);
+}
+.cassette__screw::before {
+  content: "";
+  position: absolute;
+  inset: 24%;
+  border-radius: 50%;
+  background:
+    linear-gradient(45deg, transparent 42%, #0d0e0e 43% 57%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, #0d0e0e 43% 57%, transparent 58%);
+  opacity: .9;
+}
+.cassette__screw--tl { left: 3%; top: 4.5%; }
+.cassette__screw--tr { right: 3%; top: 4.5%; }
+.cassette__screw--bl { left: 6%; bottom: 9%; }
+.cassette__screw--br { right: 6%; bottom: 9%; }
+
+/* --------------------------------------------------------------------------
+   Paper label (large, stuck on slightly crooked)
+   -------------------------------------------------------------------------- */
+.cassette__label {
+  --duo: #2b3f66;                       /* duotone shadow tint; JS overrides it from the artwork */
+  position: absolute;
+  inset: 7% 7.5% 26%;
+  overflow: hidden;
+  border: 1px solid rgba(93, 76, 51, .5);
+  border-radius: 2px 7px 9px 3px;
+  background:
+    radial-gradient(circle at 12% 88%, rgba(120, 85, 45, .18), transparent 22%),
+    radial-gradient(circle at 92% 18%, rgba(120, 85, 45, .14), transparent 20%),
+    radial-gradient(ellipse at center, transparent 55%, rgba(95, 68, 38, .22) 100%),
+    repeating-linear-gradient(0deg, rgba(100, 78, 51, .05) 0 1px, transparent 1px 4px),
+    #e0d5c0;
+  color: #222226;
+  box-shadow:
+    0 2px 2px rgba(0, 0, 0, .55),
+    0 8px 14px rgba(0, 0, 0, .35),
+    inset 0 1px rgba(255, 255, 255, .7),
+    inset 0 0 12px rgba(100, 70, 40, .25);
+  transform: rotate(-.6deg);
+  transform-origin: 20% 40%;
+}
+.cassette__label::before,
+.cassette__label::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.cassette__label::before {                /* creases */
+  z-index: 3;
+  inset: 0;
+  opacity: .4;
+  background:
+    linear-gradient(127deg, transparent 27%, rgba(66, 47, 30, .22) 27.5%, transparent 28.2%),
+    linear-gradient(72deg, transparent 79%, rgba(70, 46, 29, .16) 79.5%, transparent 80.3%);
+}
+.cassette__label::after {                 /* corner wear */
+  inset: 1px;
+  opacity: .42;
+  background:
+    radial-gradient(ellipse at 5% 4%, transparent 0 14px, rgba(92, 69, 43, .16) 15px 17px, transparent 18px),
+    linear-gradient(139deg, transparent 73%, rgba(75, 56, 36, .13) 73.4%, transparent 74.2%);
+}
+
+/* Technical strip (Stereo / Dolby / etc.) */
+.cassette__technical {
+  position: absolute;
+  z-index: 4;
+  top: 5%;
+  left: 5%;
+  right: 4%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: start;
+  border-bottom: 1px solid rgba(23, 22, 18, .55);
+  color: #171715;
+  font: 700 clamp(.3rem, .94vw, .51rem)/1 var(--font-mono);
+  letter-spacing: .01em;
+}
+.cassette__technical span { font-size: 1.05em; white-space: nowrap; }
+.cassette__technical b { font-size: 1.2em; font-weight: 400; }
+.cassette__technical small {
+  padding-left: .3rem;
+  text-align: right;
+  font: 500 clamp(.22rem, .64vw, .36rem)/1.05 var(--font-mono);
+  white-space: nowrap;
+}
+
+/* Duration badge */
+.cassette__duration {
+  position: absolute;
+  z-index: 4;
+  top: 4.7%;
+  right: 2.8%;
+  display: grid;
+  place-items: center;
+  width: 10%;
+  aspect-ratio: 1.3;
+  border-radius: 2px;
+  background: #151614;
+  color: #f6f0e4;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .16), 0 1px rgba(0, 0, 0, .36);
+  font: 700 clamp(.4rem, 1.4vw, .72rem)/1 var(--font-mono);
+}
+
+/* Album art: narrow strip on the left, duotone-tinted when artwork exists */
+.cassette__art {
+  position: absolute;
+  z-index: 1;
+  left: 3%;
+  top: 15%;
+  bottom: 5%;
+  width: 23%;
+  overflow: hidden;
+  isolation: isolate;
+  background: #263842 center / cover;
+  outline: 1px solid rgba(38, 60, 101, .35);
+  outline-offset: 2px;
+  filter: saturate(.78) contrast(1.06);
+  transition: background-color .5s ease;
+}
+.cassette__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(38, 29, 19, .12), rgba(18, 14, 10, .35));
+}
+.art-orb { position: absolute; border-radius: 50%; filter: blur(1px); }
+.art-orb--one { width: 110%; aspect-ratio: 1; left: -48%; bottom: -42%; background: #e47455; }
+.art-orb--two { width: 80%; aspect-ratio: 1; right: -33%; top: -25%; background: #d7ae57; }
+.art-grid {
+  position: absolute;
+  inset: 0;
+  opacity: .4;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, rgba(255, 255, 255, .3) 14px),
+    repeating-linear-gradient(0deg, transparent 0 13px, rgba(255, 255, 255, .3) 14px);
+}
+
+.cassette.has-artwork .cassette__art {
+  background-color: var(--duo);
+  background-blend-mode: luminosity;     /* keeps the photo's brightness, swaps in the tint colour */
+  filter: contrast(1.25) brightness(1.08);
+}
+.cassette.has-artwork .cassette__art::after {
+  background: linear-gradient(145deg, rgba(223, 205, 170, .2), rgba(38, 29, 19, .25));
+  mix-blend-mode: multiply;
+}
+.cassette.has-artwork .art-orb { opacity: 0; }
+.cassette.has-artwork .art-grid {         /* halftone dots instead of grid lines */
+  opacity: .38;
+  background: radial-gradient(circle, rgba(10, 12, 18, .9) 0 .7px, transparent 1.15px) 0 0 / 3.4px 3.4px;
+  mix-blend-mode: multiply;
+}
+
+/* Title block (handwritten) */
+.cassette__metadata {
+  position: absolute;
+  z-index: 2;
+  top: 15%;
+  left: 29%;
+  right: 0;
+  height: 38%;
+  min-width: 0;
+  padding: 0 5% 0 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+}
+.cassette__side,
+.cassette__catalog {
+  color: #3d3426;
+  opacity: .85;
+  font: 500 clamp(.31rem, .9vw, .45rem)/1 var(--font-mono);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.cassette__metadata h2,
+.cassette__metadata p {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  color: var(--ink, #263c65);           /* --ink is set from the artwork by renderer.js */
+  transition: color .5s ease;
+}
+.cassette__metadata h2 {
+  align-self: end;
+  margin: 0;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+  font-family: var(--font-hand);
+  font-size: clamp(.9rem, 3.4vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-shadow: .35px .25px 0 rgba(29, 52, 93, .52), -.18px .1px rgba(29, 52, 93, .42);
+  transform: rotate(-1.2deg);
+}
+.cassette__metadata p {
+  margin: .45em 0 0;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font: 500 clamp(.4rem, 1.2vw, .6rem)/1.1 var(--font-mono);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.cassette__stripe {
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  left: 26%;
+  right: 0;
+  height: 5%;
+  background: repeating-linear-gradient(90deg, #a55445 0 13%, #d3886b 13% 15%, #a55445 15% 27%);
+  opacity: .9;
+}
+
+/* --------------------------------------------------------------------------
+   Reel window (sits on top of the label, beside the art)
+   -------------------------------------------------------------------------- */
+.cassette__window {
+  position: absolute;
+  z-index: 2;
+  left: 32%;
+  right: 12%;
+  bottom: 30%;
+  height: 27%;
+  overflow: hidden;
+  border: 1px solid rgba(20, 16, 12, .75);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(2, 3, 4, .95), rgba(40, 42, 42, .88));
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, .9), 0 0 0 2px rgba(40, 34, 28, .4);
+}
+.cassette__window-mark {
+  position: absolute;
+  right: 3%;
+  top: 8%;
+  color: rgba(236, 231, 213, .54);
+  font: 500 .45rem var(--font-mono);
+}
+
+/* Reels and tape are sized from the window's height so they never clip. */
+.cassette__tape {
+  position: absolute;
+  top: -25%;
+  height: 150%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, #161513 0 1px, #39342c 2px 3px, #11100f 4px 5px);
+  opacity: .94;
+}
+.cassette__tape--left { left: 2%; }
+.cassette__tape--right { right: 2%; }
+
+.cassette__reel {
+  position: absolute;
+  z-index: 1;
+  top: 10%;
+  height: 80%;
+  aspect-ratio: 1;
+  border: 2px solid #aaa89e;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#d3d0c4 0deg 5deg, #4d4e4b 6deg 14.8deg, #b0aea4 15.2deg 15.8deg);
+  /* FIX: the old shadows used "13%", which is invalid in box-shadow, so the browser dropped them. */
+  box-shadow: 0 1px 4px #000, inset 0 0 0 4px #292a29, 0 0 0 2px rgba(235, 230, 213, .13);
+  /* Always attached but paused, so the reels hold their angle on pause instead of snapping to 0. */
+  animation: reel-spin 2.1s linear infinite paused;
+}
+.cassette__reel--left { left: 12.5%; }
+.cassette__reel--right { right: 12.5%; animation-duration: 1.7s; animation-direction: reverse; }
+.cassette__reel::before {
+  content: "";
+  position: absolute;
+  inset: 19%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(24, 25, 24, .85) 0deg 5deg, transparent 5.6deg 15deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 28%, #000 30% 67%, transparent 69%);
+          mask: radial-gradient(circle, transparent 0 28%, #000 30% 67%, transparent 69%);
+  opacity: .9;
+}
+.cassette__reel i {
+  position: absolute;
+  z-index: 2;
+  inset: 33%;
+  border-radius: 50%;
+  background: #181a19;
+  box-shadow: inset 0 0 0 2px #858176;
+}
+.cassette__reel b {
+  position: absolute;
+  z-index: 3;
+  inset: 43%;
+  border-radius: 50%;
+  background: #c9c6b9;
+}
+.cassette.is-playing .cassette__reel { animation-play-state: running; }
+.cassette.is-idle .cassette__reel { opacity: .76; }
+
+.cassette__tape-line {
+  position: absolute;
+  z-index: 2;
+  top: 49%;
+  left: 38%;
+  right: 38%;
+  height: 4%;
+  background: linear-gradient(#c0bdb0, #474740);
+  box-shadow: 0 0 3px #000;
+}
+
+/* Old printed marks that no longer have room. Delete these elements from index.html when convenient. */
+.cassette__bridge,
+.cassette__type-mark { display: none; }
+
+/* --------------------------------------------------------------------------
+   Bottom housing, notches and spine text
+   -------------------------------------------------------------------------- */
+.cassette__bottom-housing {
+  position: absolute;
+  z-index: 4;
+  left: 19%;
+  right: 19%;
+  bottom: 2.9%;
+  height: 20%;
+  border: 1px solid rgba(205, 204, 192, .22);
+  border-radius: 4px 4px 8px 8px;
+  background: linear-gradient(155deg, rgba(49, 53, 53, .86), rgba(9, 11, 12, .95));
+  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .14), 0 -1px 2px rgba(0, 0, 0, .78);
+}
+.cassette__grip {
+  position: absolute;
+  inset: 8% 8% 30%;
+  border-radius: 2px;
+  opacity: .68;
+  background:
+    repeating-linear-gradient(45deg, rgba(200, 199, 184, .18) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, .34) 0 1px, transparent 1px 4px);
+  box-shadow: inset 0 1px 3px #000;
+}
+.cassette__guide,
+.cassette__pad {
+  position: absolute;
+  bottom: 11%;
+  display: block;
+  height: 27%;
+  border-radius: 40% 40% 28% 28%;
+  background: #08090a;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .13), 0 1px rgba(255, 255, 255, .1);
+}
+.cassette__guide { width: 10%; }
+.cassette__guide--left { left: 15%; }
+.cassette__guide--right { right: 15%; }
+.cassette__pad { width: 13%; background: #151718; }
+.cassette__pad--left { left: 37%; }
+.cassette__pad--right { right: 37%; }
+
+.cassette__notch {
+  position: absolute;
+  bottom: 0;
+  width: 13%;
+  height: 10%;
+  background: #0b0d0e;
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+.cassette__notch--left { left: 8%; clip-path: polygon(0 0, 100% 30%, 100% 100%, 0 100%); }
+.cassette__notch--right { right: 8%; clip-path: polygon(0 30%, 100% 0, 100% 100%, 0 100%); }
+
+.cassette__spine {
+  position: absolute;
+  z-index: 5;
+  left: 10%;
+  right: 10%;
+  bottom: 5.6%;
+  text-align: center;
+  color: rgba(218, 208, 182, .82);
+  font: 500 clamp(.27rem, .75vw, .38rem)/1 var(--font-mono);
+  letter-spacing: .11em;
+  text-shadow: 0 1px #060707, 0 0 2px rgba(238, 227, 197, .2);
+}
+
+/* --------------------------------------------------------------------------
+   Window controls (minimise / pin / close)
+   -------------------------------------------------------------------------- */
+.window-controls {
+  position: absolute;
+  z-index: 5;
+  top: .2rem;
+  right: .35rem;
+  display: flex;
+  padding: .1rem;
+  border-radius: .45rem;
+  background: rgba(14, 14, 17, .62);    /* keeps the icons legible on any wallpaper */
+  /* FIX: invisible controls used to stay clickable and could close the widget by accident. */
+  opacity: 0;
+  pointer-events: none;
+  /* Short delay on hide so the bar doesn't vanish while the pointer crosses the drag margin. */
+  transition: opacity .18s ease .6s;
+  -webkit-app-region: no-drag;
+}
+.showcase:hover .window-controls,
+.window-controls:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.window-controls button {
+  width: 1.55rem;
+  height: 1.35rem;
+  border: 0;
+  border-radius: .3rem;
+  background: transparent;
+  color: #b7b1ad;
+  font: 400 .92rem/1 var(--font-ui);
+  cursor: pointer;
+}
+.window-controls button:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.window-controls button[aria-pressed="true"] { color: #d99571; }
+.window-controls button:last-child:hover { background: #b84641; }
+.window-controls button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+/* --------------------------------------------------------------------------
+   Player panel (slides open when the cassette is clicked)
+   -------------------------------------------------------------------------- */
+.player-panel {
+  width: min(100%, 365px);
+  margin: 0 auto;
+  display: grid;
+  gap: .55rem;
+  padding-block: 0;
+  padding-inline: .6rem;
+  border: 1px solid rgba(238, 232, 222, .1);
+  border-radius: .9rem;
+  background: rgba(12, 12, 15, .55);     /* soft scrim: text stays readable on bright wallpapers */
+  /* collapsed state */
+  max-height: 0;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: max-height .26s ease, opacity .18s ease, transform .26s ease, padding .26s ease;
+  -webkit-app-region: no-drag;
+}
+.showcase.is-controls-open .player-panel {
+  /* FIX: 8rem was slightly too short and clipped the bottom of the buttons. */
+  max-height: 10rem;
+  padding-block: .55rem .5rem;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.player-panel__track {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .8rem;
+}
+.player-panel__track > div:first-child { display: grid; min-width: 0; gap: .18rem; }
+.player-panel__track span {
+  overflow: hidden;
+  color: #f7f1eb;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.player-panel__track small {
+  overflow: hidden;
+  color: #aaa49f;
+  font-size: .67rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.player-panel__track .player-panel__eyebrow {
+  color: #ce906e;
+  font: 500 .5rem/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+/* Spectrum bars: animate transform (cheap) instead of height (layout). */
+.player-panel__spectrum {
+  height: 1.7rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: .4;
+}
+.player-panel__spectrum i {
+  width: 2px;
+  height: 100%;
+  border-radius: 4px;
+  background: #e0a47c;
+  transform: scaleY(.22);
+}
+.showcase.is-playing .player-panel__spectrum { opacity: 1; }
+.showcase.is-playing .player-panel__spectrum i { animation: spectrum .8s ease-in-out infinite alternate; }
+.showcase.is-playing .player-panel__spectrum i:nth-child(2) { animation-delay: -.35s; animation-duration: .55s; }
+.showcase.is-playing .player-panel__spectrum i:nth-child(3) { animation-delay: -.6s; animation-duration: .9s; }
+.showcase.is-playing .player-panel__spectrum i:nth-child(4) { animation-delay: -.15s; animation-duration: .64s; }
+.showcase.is-playing .player-panel__spectrum i:nth-child(5) { animation-delay: -.45s; animation-duration: .72s; }
+
+.player-panel__timeline {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: .5rem;
+  color: rgba(239, 234, 225, .78);
+  font: 500 .54rem/1 var(--font-mono);
+  letter-spacing: .04em;
+}
+.player-panel__progress {
+  --progress: 0%;
+  height: 2px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .19);
+}
+.player-panel__progress span {
+  display: block;
+  width: var(--progress);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d17a58, #e2bd84);
+  transition: width .5s ease;
+}
+
+.player-panel__controls {
+  display: grid;
+  grid-template-columns: 2.2rem 2.65rem 2.2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin: 0;
+}
+.player-panel button {
+  /* FIX: width and height are now both set, so the round buttons are true circles. */
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #f1ebe4;
+  font: 600 .72rem var(--font-ui);
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease;
+}
+.player-panel button svg { width: 1rem; fill: currentColor; vertical-align: middle; }
+.player-panel button:not(:disabled):hover { background: rgba(255, 255, 255, .12); }
+.player-panel button.is-pressed { transform: scale(.95); }
+.player-panel button:disabled { opacity: .35; cursor: default; }
+.player-panel button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.player-panel__controls .player-panel__play {
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid rgba(255, 255, 255, .56);
+  background: rgba(11, 12, 14, .8);
+  color: #f5ede5;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .15), 0 3px 11px rgba(0, 0, 0, .45);
+}
+.player-panel__controls .player-panel__play:not(:disabled):hover { background: rgba(48, 46, 44, .95); }
+
+/* Optional icon swap: put both SVGs in the play button and toggle .is-playing on it. */
+.player-panel__play .icon-pause,
+.player-panel__play.is-playing .icon-play { display: none; }
+.player-panel__play.is-playing .icon-pause { display: inline-block; }
+
+/* --------------------------------------------------------------------------
+   Animations
+   -------------------------------------------------------------------------- */
+@keyframes reel-spin { to { transform: rotate(360deg); } }
+@keyframes spectrum { to { transform: scaleY(.95); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cassette,
+  .cassette__art,
+  .cassette__metadata h2,
+  .cassette__metadata p,
+  .window-controls,
+  .player-panel,
+  .player-panel button,
+  .player-panel__progress span { transition: none; }
+  .cassette { transform: none; }          /* no hover tilt */
+  .cassette__reel,
+  .showcase.is-playing .player-panel__spectrum i { animation: none; }
+}
+/* ===== Click-through window ===== */
+.showcase { -webkit-app-region: no-drag; }   /* dragging is handled in renderer.js now */
+.cassette { cursor: grab; }
+.cassette:active { cursor: grabbing; }
+
+/* the three buttons only show (and only catch clicks) while you're on the widget */
+.window-controls { opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+.showcase:hover .window-controls { opacity: 0; }
+.showcase.is-hot .window-controls { opacity: 1; pointer-events: auto; }
+/* ===== Seek bar ===== */
+.player-panel__timeline { padding: 7px 0; }               /* taller hit area around the 2px bar */
+.player-panel__timeline.is-seekable { cursor: pointer; }
+.player-panel__progress.is-scrubbing span { transition: none; }   /* follow the mouse exactly while dragging */
