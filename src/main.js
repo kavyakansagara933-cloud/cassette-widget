@@ -215,7 +215,7 @@ function createWindow() {
     alwaysOnTop: settings.alwaysOnTop !== false,
     skipTaskbar: true,
     show: false,
-    title: 'Smoke & Tape',
+    title: 'Cassette Widget',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -250,12 +250,12 @@ function toggleWidget() {
 
 function createTray() {
   tray = new Tray(trayImage());
-  tray.setToolTip('Smoke & Tape');
+  tray.setToolTip('Cassette Widget');
   tray.on('click', toggleWidget);
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Show / hide widget', click: toggleWidget },
     { type: 'separator' },
-    { label: 'Quit Smoke & Tape', click: () => { isQuitting = true; app.quit(); } },
+    { label: 'Quit Cassette Widget', click: () => { isQuitting = true; app.quit(); } },
   ]));
 }
 
@@ -271,7 +271,7 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   app.whenReady().then(() => {
-    app.setAppUserModelId('com.smokeandtape.widget');
+    app.setAppUserModelId('com.cassettewidget.app');
     startDaemon();
     ipcMain.handle('media:snapshot', async () => {
       try { return await snapshot(); }
