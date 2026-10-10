@@ -1,0 +1,13 @@
+{
+  "name": "smoke-and-tape",
+  "version": "0.1.0",
+  "description": "A Windows Now Playing cassette widget.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^39.2.7"
+  }
+}
