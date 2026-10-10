@@ -1,73 +1,88 @@
-# Smoke & Tape — Windows desktop widget
+# Cassette Widget
 
-A Windows desktop cassette that reflects and controls the active Windows media session. It is desktop-first: draggable, resizable, always-on-top, and deliberately not optimized for mobile.
+A retro cassette-tape "now playing" widget for the Windows desktop. It shows whatever is playing on your PC (Spotify, a browser tab, VLC and other players) on a glass-shelled cassette with a handwritten label, the album cover, spinning reels and basic playback controls.
+
+<!-- Add a screenshot at docs/screenshot.png, then uncomment the next line -->
+<!-- ![Cassette Widget](docs/screenshot.png) -->
+
+## Features
+
+- **Live now-playing info** from Windows media sessions: title, artist, album art, play state and progress
+- **Album art on the label**, with a duotone tint picked from the cover's dominant colour, so every track gets its own look
+- **Cover fallback**: if Windows has no thumbnail for a track, the cover is looked up online in the background (see Privacy)
+- **Playback controls**: play/pause, next, previous, and click or drag the progress bar to seek (when the player allows it)
+- **Real widget behaviour**: frameless and transparent, no taskbar button, tray icon, always-on-top pin, remembers its position
+- **Click-through**: only the cassette and the controls catch the mouse; clicks anywhere else go to the apps behind it
+- **Drag to move**: drag the cassette anywhere on screen; a plain click opens or hides the controls
+- **Light on resources**: one long-running media process instead of one per update, adaptive polling, slower when hidden
+
+## Requirements
+
+- Windows 10 (version 1809 or later) or Windows 11
+- [Node.js](https://nodejs.org/) (LTS)
 
 ## Run it
 
-Install dependencies, then run the app:
-
-```powershell
+```bash
+git clone https://github.com/kavyakansagara933-cloud/cassette-widget.git
+cd cassette-widget
 npm install
-npm start
+npm run dev
 ```
 
-The app uses Windows PowerShell's WinRT access to read the current Windows media session. Start music in Spotify, VLC, a supported browser tab, or another compatible player; the widget should then update automatically.
+Start a song in any media player and the cassette picks it up within a second or so. Only one copy of the widget runs at a time; starting it again just brings the existing one forward.
 
-## Component anatomy
+## Using the widget
 
-The cassette is organized into independently addressable layers:
+| Action | What it does |
+| --- | --- |
+| Click the cassette | Show or hide the controls panel |
+| Drag the cassette | Move the widget |
+| Click or drag the progress bar | Seek (if the player supports it) |
+| Hover the widget | Reveals the pin, minimise and close buttons |
+| Tray icon | Show or hide the widget, or quit |
 
-- `cassette__shell` — smoked plastic housing, inner rim, gloss, and depth.
-- `cassette__label` — integrated cover art and editable album metadata.
-- `cassette__window` — tape bed, reels, tape line, and duration mark.
-- `cassette__bridge`, screws, notches, and spine — the small physical details that make it feel manufactured.
+The close and minimise buttons only hide the widget. Use **Quit** in the tray menu to exit.
 
-Sizing is fluid (`clamp(300px, 54vw, 370px)`) so the object stays a substantial, readable presence across small and large screens.
-
-## Current behavior
-
-- Reads the current Windows Now Playing title, artist, playback state, timeline, source, and (when supplied by the source) artwork.
-- Uses a public metadata lookup only as an artwork fallback when the media app does not supply cover art to Windows; it does not require an account or transmit playback controls.
-- Provides play/pause, next, and previous controls when the active player permits them.
-- Spins the cassette reels while Windows reports active playback.
-- Shows a graceful waiting state when Windows has no active compatible media session.
-- Starts as an always-on-top, borderless desktop widget. Drag its background to reposition it; resize from its edges and corners.
-- Hides to the system tray instead of quitting when its × control is used. Click the cassette tray icon to bring it back; right-click it to quit.
-- Remembers its last size, position, and always-on-top preference.
-
-## Compatibility note
-
-Windows only exposes controls that the currently playing app publishes. The widget does not log in to Spotify or scrape another app; it asks Windows for the active media session, so it can work across compatible players without an account connection. Artwork is also supplied by the player and may occasionally fall back to the cassette's built-in cover treatment.
-
-## Deliberately out of scope
-
-- Spotify sign-in, search, playlists, and queue editing.
-- Side A/B as an actual playback concept.
-- Volume and seeking controls (support varies across media sources).
-- Mobile layouts.
-
-## Planned next stages
-
-1. Pointer-driven tilt and specular reflection.
-2. Stronger artwork support and source-specific fallback identity.
-3. Optional volume and seeking controls where Windows allows them.
-4. Installer, icon, and production packaging.
-
-## Reuse notes
-
-For a production integration, move the `article.cassette` markup into a component and expose the label data, artwork palette, tape duration, and side as props. The present class names are deliberately stable hooks for those later behaviors.
-
-## Structure
+## How it works
 
 ```
-.
-├── index.html                 # Renderer window
-├── package.json
-├── src/
-│   ├── cassette.css           # Visual component
-│   ├── main.js                # Electron window and safe IPC
-│   ├── media-session.ps1      # Windows media-session bridge
-│   ├── preload.js             # Narrow renderer API
-│   └── renderer.js            # UI state and controls
-└── README.md
+renderer.js  <--  preload.js  <-->  main.js  <-->  media-daemon.ps1
+ (the UI)        (safe bridge)    (Electron main)   (Windows media API)
 ```
+
+- **`media-daemon.ps1`** is a PowerShell script started once by the app. It talks to the Windows media transport controls, and prints one JSON line whenever something changes. Artwork is sent separately and only once per track, so the title shows up instantly and the cover follows as soon as Windows has it.
+- **`main.js`** keeps the latest state in memory and answers the UI immediately. It also owns the window, tray, saved settings, and click-through switching. If the daemon is missing or crashes, it falls back to `media-session.ps1`, a one-shot version of the same script.
+- **`preload.js`** exposes a small, safe API (`snapshot`, `command`, `seek`, window controls) to the page.
+- **`renderer.js`** paints the label, extracts the cover's colour, runs the progress bar and seeking, and decides which parts of the window should catch the mouse.
+
+## Project structure
+
+```
+cassette-widget/
+├─ index.html
+├─ package.json
+└─ src/
+   ├─ main.js            Electron main process
+   ├─ preload.js         bridge between page and main
+   ├─ renderer.js        UI logic
+   ├─ cassette.css       all styling
+   ├─ media-daemon.ps1   long-running Windows media process
+   └─ media-session.ps1  one-shot fallback
+```
+
+## Notes and limits
+
+- **Windows only.** It relies on the Windows media transport controls.
+- **Seeking depends on the player.** The progress bar only reacts when the current player reports that seeking is supported.
+- **When several players are open**, the widget follows one that is playing and stays with it instead of jumping between apps.
+- **Privacy:** only when Windows provides no cover, the song title and artist are sent to Apple's public iTunes Search API to find one. Nothing else leaves your PC, and nothing is sent when Windows supplies the cover itself.
+
+## Roadmap
+
+- Desktop-layer mode: sit behind other windows by default, with a hotkey to bring it on top
+- Don't steal focus when clicked, and hide from Alt+Tab
+- Stay on screen if monitors change, plus tray options for size, lock and reset position
+- Fade or hide when nothing is playing
+- Reels that wind from one spool to the other with the song's progress
+- Launch at login once the app is packaged as an installer
