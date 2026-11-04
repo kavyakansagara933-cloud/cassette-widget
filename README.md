@@ -86,3 +86,13 @@ cassette-widget/
 - Fade or hide when nothing is playing
 - Reels that wind from one spool to the other with the song's progress
 - Launch at login once the app is packaged as an installer
+
+## Copyright
+
+Copyright © 2026 Kavya Kansagara. All Rights Reserved.
+
+Developed by Kavya Kansagara.
+
+This project is provided for portfolio and educational viewing purposes only. Copying, redistribution, modification, or commercial use requires prior written permission from the copyright owner.
+
+Original repository: https://github.com/kavyakansagara933-cloud/cassette-widget
